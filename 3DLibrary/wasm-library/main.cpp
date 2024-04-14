@@ -212,13 +212,15 @@ class PolyMesh {
             return emscripten::val(emscripten::typed_memory_view(segments.size(), segments.data()));
         }
 
-        emscripten::val generate_obb() {
+        int generate_obb() {
             // Compute the extreme points of the mesh, and then a tightly fitted oriented bounding box
             std::array<Kernel::Point_3, 8> obb_points;
             CGAL::oriented_bounding_box(mesh, obb_points, CGAL::parameters::use_convex_hull(true));
 
             CGAL::make_hexahedron(obb_points[0], obb_points[1], obb_points[2], obb_points[3],
                                     obb_points[4], obb_points[5], obb_points[6], obb_points[7], obbMesh);
+            
+            return 0;
         }
 
         emscripten::val getObbVertices(){
