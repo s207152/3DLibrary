@@ -212,7 +212,7 @@ class PolyMesh {
             return emscripten::val(emscripten::typed_memory_view(segments.size(), segments.data()));
         }
 
-        int generate_obb() {
+        int obb() {
             // Compute the extreme points of the mesh, and then a tightly fitted oriented bounding box
             std::array<Kernel::Point_3, 8> obb_points;
             CGAL::oriented_bounding_box(mesh, obb_points, CGAL::parameters::use_convex_hull(true));
@@ -273,7 +273,7 @@ EMSCRIPTEN_BINDINGS(my_module) {
     .function("sqrt_smooth", &PolyMesh::sqrt_smooth, emscripten::allow_raw_pointers())
     .function("dooSabin_smooth", &PolyMesh::dooSabin_smooth, emscripten::allow_raw_pointers())
     .function("segment", &PolyMesh::segment, emscripten::allow_raw_pointers())
-    .function("generate_obb", &PolyMesh::generate_obb, emscripten::allow_raw_pointers())
+    .function("obb", &PolyMesh::obb, emscripten::allow_raw_pointers())
     .function("getObbIndices", &PolyMesh::getObbIndices, emscripten::allow_raw_pointers())
     .function("getObbVertices", &PolyMesh::getObbVertices, emscripten::allow_raw_pointers())
     .function("decimate", &PolyMesh::decimate, emscripten::allow_raw_pointers());
