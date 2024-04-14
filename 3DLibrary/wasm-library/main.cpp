@@ -47,6 +47,7 @@ class PolyMesh {
         std::vector<double> vertices;
         std::vector<int> faces;
         SurfaceMesh mesh;
+        SurfaceMesh obbMesh;
         // SurfaceMesh triangulatedMesh;
     public:
         Kernel::Point_3 sdf_p = Kernel::Point_3(0, 4, 0);
@@ -211,19 +212,49 @@ class PolyMesh {
             return emscripten::val(emscripten::typed_memory_view(segments.size(), segments.data()));
         }
 
-        emscripten::val obb() {
+        emscripten::val generate_obb() {
             // Compute the extreme points of the mesh, and then a tightly fitted oriented bounding box
             std::array<Kernel::Point_3, 8> obb_points;
             CGAL::oriented_bounding_box(mesh, obb_points, CGAL::parameters::use_convex_hull(true));
 
+            CGAL::make_hexahedron(obb_points[0], obb_points[1], obb_points[2], obb_points[3],
+                                    obb_points[4], obb_points[5], obb_points[6], obb_points[7], obbMesh);
+        }
+
+        emscripten::val getObbVertices(){
             std::vector<double> vertices;
-            for(int i = 0; i < 8; i++){
-                auto point = obb_points[i];
+            for(auto vertexIt = obbMesh.vertices_begin(); vertexIt != obbMesh.vertices_end(); ++vertexIt){
+                auto point = obbMesh.point(*vertexIt);
                 vertices.push_back(point.x());
                 vertices.push_back(point.y());
                 vertices.push_back(point.z());
             }
             return emscripten::val(emscripten::typed_memory_view(vertices.size(), vertices.data()));
+        }
+
+        emscripten::val getObbIndices(){
+            std::vector<int> indices;
+            SurfaceMesh triangulatedMesh = obbMesh;
+            if(!this->isTriangulated(mesh)){
+                std::cout<<"non-triangular mesh, triangulating..."<<std::endl;
+                this->triangulate(triangulatedMesh); //triangulate first
+            }
+            
+             for(auto faceIt = triangulatedMesh.faces_begin(); faceIt != triangulatedMesh.faces_end(); ++faceIt){
+                //get the vertices of the face
+                auto halfedgeIt = triangulatedMesh.halfedge(*faceIt);
+                auto halfedgeIt2 = triangulatedMesh.next(halfedgeIt);
+                auto halfedgeIt3 = triangulatedMesh.next(halfedgeIt2);
+                auto vertexIt = triangulatedMesh.target(halfedgeIt);
+                auto vertexIt2 = triangulatedMesh.target(halfedgeIt2);
+                auto vertexIt3 = triangulatedMesh.target(halfedgeIt3);
+                indices.push_back(vertexIt.idx());
+                indices.push_back(vertexIt2.idx());
+                indices.push_back(vertexIt3.idx());
+            }
+            triangulatedMesh.clear();
+            triangulatedMesh.collect_garbage();
+            return emscripten::val(emscripten::typed_memory_view(indices.size(), indices.data()));
         }
 };
 
@@ -240,6 +271,8 @@ EMSCRIPTEN_BINDINGS(my_module) {
     .function("sqrt_smooth", &PolyMesh::sqrt_smooth, emscripten::allow_raw_pointers())
     .function("dooSabin_smooth", &PolyMesh::dooSabin_smooth, emscripten::allow_raw_pointers())
     .function("segment", &PolyMesh::segment, emscripten::allow_raw_pointers())
-    .function("obb", &PolyMesh::obb, emscripten::allow_raw_pointers())
+    .function("generate_obb", &PolyMesh::generate_obb, emscripten::allow_raw_pointers())
+    .function("getObbIndices", &PolyMesh::getObbIndices, emscripten::allow_raw_pointers())
+    .function("getObbVertices", &PolyMesh::getObbVertices, emscripten::allow_raw_pointers())
     .function("decimate", &PolyMesh::decimate, emscripten::allow_raw_pointers());
 }
