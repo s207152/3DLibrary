@@ -6,8 +6,8 @@ mkdir -p libraries/downloads
 
 # ##################################### CGAL #####################################
 
-CGAL_VERSION=5.5.2
-CGAL_NAME=CGAL-5.5.2.tar.xz
+CGAL_VERSION=5.6.1
+CGAL_NAME=CGAL-5.6.1.tar.xz
 CGAL_URL=https://github.com/CGAL/cgal/releases/download/v$CGAL_VERSION/$CGAL_NAME
 
 echo "Downloading "$CGAL_NAME
@@ -19,8 +19,8 @@ echo "Done"
 
 # ##################################### BOOST #####################################
 
-BOOST_VERSION=1.81.0
-BOOST_NAME=boost_1_81_0.tar.gz
+BOOST_VERSION=1.84.0
+BOOST_NAME=boost_1_84_0.tar.gz
 BOOST_URL=https://boostorg.jfrog.io/artifactory/main/release/$BOOST_VERSION/source/$BOOST_NAME
 
 echo "Downloading "$BOOST_NAME
@@ -32,7 +32,7 @@ echo "Done"
 
 ##################################### GMP #####################################
 
-GMP_VERSION=6.2.1
+GMP_VERSION=6.3.0
 GMP_NAME=gmp-$GMP_VERSION.tar.xz
 GMP_URL=https://gmplib.org/download/gmp/$GMP_NAME
 
@@ -44,7 +44,7 @@ echo "Done"
 
 
 ##################################### LIBIGL #####################################
-LIBIGL_VERSION=2.4.0
+LIBIGL_VERSION=2.5.0
 LIBIGL_NAME=v$LIBIGL_VERSION.tar.gz
 LIBIGL_URL=https://github.com/libigl/libigl/archive/refs/tags/$LIBIGL_NAME
 
@@ -57,7 +57,7 @@ echo "Done"
 
 ##################################### EIGEN #####################################
 
-EIGEN_VERSION=3.3.9
+EIGEN_VERSION=3.4.0
 EIGEN_NAME=eigen-$EIGEN_VERSION.tar.bz2
 EIGEN_URL=https://gitlab.com/libeigen/eigen/-/archive/$EIGEN_VERSION/$EIGEN_NAME
 
@@ -67,7 +67,7 @@ echo "Extracting"
 tar -xf libraries/downloads/$EIGEN_NAME -C libraries
 echo "Done"
 
-LIBIGL_VERSION=2.4.0
+LIBIGL_VERSION=2.5.0
 LIBIGL_NAME=v$LIBIGL_VERSION.tar.gz
 LIBIGL_URL=https://github.com/libigl/libigl/archive/refs/tags/$LIBIGL_NAME
 
@@ -79,7 +79,7 @@ echo "Done"
 
 
 ##################################### mpfr #####################################
-MPFR_VERSION=4.2.0
+MPFR_VERSION=4.2.1
 MPFR_NAME=mpfr-$MPFR_VERSION.tar.xz
 MPFR_URL=https://www.mpfr.org/mpfr-current/$MPFR_NAME
 
