@@ -143,8 +143,8 @@ class PolyMesh {
                 indices.push_back(vertexIt2.idx());
                 indices.push_back(vertexIt3.idx());
             }
-            triangulatedMesh.clear();
-            triangulatedMesh.collect_garbage();
+            // triangulatedMesh.clear();
+            // triangulatedMesh.collect_garbage();
             return emscripten::val(emscripten::typed_memory_view(indices.size(), indices.data()));
         }
 
