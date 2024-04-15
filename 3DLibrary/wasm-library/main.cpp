@@ -47,6 +47,8 @@ class PolyMesh {
         std::vector<double> vertices;
         std::vector<int> faces;
         SurfaceMesh mesh;
+        std::vector<double> obbVertices;
+        std::vector<int> obbIndices;
         SurfaceMesh obbMesh;
         // SurfaceMesh triangulatedMesh;
     public:
@@ -229,20 +231,22 @@ class PolyMesh {
         }
 
         emscripten::val getObbVertices(){
-            std::vector<double> vertices;
+            // std::vector<double> vertices;
+            obbVertices.clear();
             for(auto vertexIt = obbMesh.vertices_begin(); vertexIt != obbMesh.vertices_end(); ++vertexIt){
                 auto point = obbMesh.point(*vertexIt);
-                vertices.push_back(point.x());
-                vertices.push_back(point.y());
-                vertices.push_back(point.z());
+                obbVertices.push_back(point.x());
+                obbVertices.push_back(point.y());
+                obbVertices.push_back(point.z());
 
                 std::cout << "vertex:" << point.x() << "," << point.y() << "," << point.z() << std::endl;
             }
-            return emscripten::val(emscripten::typed_memory_view(vertices.size(), vertices.data()));
+            return emscripten::val(emscripten::typed_memory_view(obbVertices.size(), obbVertices.data()));
         }
 
         emscripten::val getObbIndices(){
-            std::vector<int> indices;
+            // std::vector<int> indices;
+            obbIndices.clear();
             SurfaceMesh triangulatedMesh = obbMesh;
             // if(!this->isTriangulated(triangulatedMesh)){
             //     std::cout<<"non-triangular mesh, triangulating..."<<std::endl;
@@ -257,13 +261,13 @@ class PolyMesh {
                 auto vertexIt = triangulatedMesh.target(halfedgeIt);
                 auto vertexIt2 = triangulatedMesh.target(halfedgeIt2);
                 auto vertexIt3 = triangulatedMesh.target(halfedgeIt3);
-                indices.push_back(vertexIt.idx());
-                indices.push_back(vertexIt2.idx());
-                indices.push_back(vertexIt3.idx());
+                obbIndices.push_back(vertexIt.idx());
+                obbIndices.push_back(vertexIt2.idx());
+                obbIndices.push_back(vertexIt3.idx());
             }
             // triangulatedMesh.clear();
             // triangulatedMesh.collect_garbage();
-            return emscripten::val(emscripten::typed_memory_view(indices.size(), indices.data()));
+            return emscripten::val(emscripten::typed_memory_view(obbIndices.size(), obbIndices.data()));
         }
 };
 
