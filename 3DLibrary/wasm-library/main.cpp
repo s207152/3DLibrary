@@ -220,6 +220,11 @@ class PolyMesh {
             CGAL::make_hexahedron(obb_points[0], obb_points[1], obb_points[2], obb_points[3],
                                     obb_points[4], obb_points[5], obb_points[6], obb_points[7], obbMesh);
             
+            for (auto i = 0; i < 8; i++) {
+                auto point = obb_points[i];
+                std::cout << "generate_obb["<<i<<"]:" << point.x() << "," << point.y() << "," << point.z() << std::endl;
+            }
+
             return 0;
         }
 
@@ -230,6 +235,8 @@ class PolyMesh {
                 vertices.push_back(point.x());
                 vertices.push_back(point.y());
                 vertices.push_back(point.z());
+
+                std::cout << "vertex:" << point.x() << "," << point.y() << "," << point.z() << std::endl;
             }
             return emscripten::val(emscripten::typed_memory_view(vertices.size(), vertices.data()));
         }
