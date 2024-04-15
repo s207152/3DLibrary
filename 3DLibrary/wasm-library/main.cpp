@@ -248,11 +248,11 @@ class PolyMesh {
             // std::vector<int> indices;
             obbIndices.clear();
             SurfaceMesh triangulatedMesh = obbMesh;
-            // if(!this->isTriangulated(triangulatedMesh)){
-            //     std::cout<<"non-triangular mesh, triangulating..."<<std::endl;
-            //     this->triangulate(triangulatedMesh); //triangulate first
-            // }
-            
+            if(!this->isTriangulated(triangulatedMesh)){
+                std::cout<<"non-triangular mesh, triangulating..."<<std::endl;
+                this->triangulate(triangulatedMesh); //triangulate first
+            }
+            auto i = 0;
              for(auto faceIt = triangulatedMesh.faces_begin(); faceIt != triangulatedMesh.faces_end(); ++faceIt){
                 //get the vertices of the face
                 auto halfedgeIt = triangulatedMesh.halfedge(*faceIt);
@@ -264,6 +264,9 @@ class PolyMesh {
                 obbIndices.push_back(vertexIt.idx());
                 obbIndices.push_back(vertexIt2.idx());
                 obbIndices.push_back(vertexIt3.idx());
+
+                std::cout << "index["<<i<<"]:" << vertexIt.idx() << "," << vertexIt2.idx() << "," << vertexIt3.idx() << std::endl;
+                i++;
             }
             // triangulatedMesh.clear();
             // triangulatedMesh.collect_garbage();
