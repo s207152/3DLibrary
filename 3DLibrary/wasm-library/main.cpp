@@ -237,10 +237,10 @@ class PolyMesh {
         emscripten::val getObbIndices(){
             std::vector<int> indices;
             SurfaceMesh triangulatedMesh = obbMesh;
-            if(!this->isTriangulated(obbMesh)){
-                std::cout<<"non-triangular mesh, triangulating..."<<std::endl;
-                this->triangulate(triangulatedMesh); //triangulate first
-            }
+            // if(!this->isTriangulated(triangulatedMesh)){
+            //     std::cout<<"non-triangular mesh, triangulating..."<<std::endl;
+            //     this->triangulate(triangulatedMesh); //triangulate first
+            // }
             
              for(auto faceIt = triangulatedMesh.faces_begin(); faceIt != triangulatedMesh.faces_end(); ++faceIt){
                 //get the vertices of the face
@@ -254,8 +254,8 @@ class PolyMesh {
                 indices.push_back(vertexIt2.idx());
                 indices.push_back(vertexIt3.idx());
             }
-            triangulatedMesh.clear();
-            triangulatedMesh.collect_garbage();
+            // triangulatedMesh.clear();
+            // triangulatedMesh.collect_garbage();
             return emscripten::val(emscripten::typed_memory_view(indices.size(), indices.data()));
         }
 };
