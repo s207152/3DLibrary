@@ -274,7 +274,100 @@ class PolyMesh {
         }
 };
 
+bool isTriangulated(const SurfaceMesh& mesh) {
+    for (const auto& f : mesh.faces()) {
+        if (mesh.degree(f) != 3) {
+            return false;  // Face does not have 3 vertices, not triangulated
+        }
+    }
+    return true;
+}
+
+struct GenerateObbParams {
+    std::vector<double> vertices;
+    std::vector<int> indices;
+};
+
+struct GenerateObbData {
+    std::vector<double> vertices;
+    std::vector<int> indices;
+};
+
+GenerateObbData generate_obb(GenerateObbParams params) {
+    SurfaceMesh mesh;
+    SurfaceMesh obb_mesh;
+    std::array<Kernel::Point_3, 8> obb_points;
+    GenerateObbData data;
+
+    for (auto i = 0; i < params.vertices.size(); i += 3) {
+        auto x = params.vertices.at(i);
+        auto y = params.vertices.at(i+1);
+        auto z = params.vertices.at(i+2);
+        mesh.add_vertex(Kernel::Point_3(x, y, z));
+    }
+
+    for (auto i = 0; i < params.indices.size(); i += 3) {
+        std::vector<SurfaceMesh::vertex_index> vi;
+        vi.push_back(mesh.vertices().begin()[params.indices.at(i)]);
+        vi.push_back(mesh.vertices().begin()[params.indices.at(i+1)]);
+        vi.push_back(mesh.vertices().begin()[params.indices.at(i+2)]);
+        mesh.add_face(vi);
+    }
+
+    CGAL::oriented_bounding_box(mesh, obb_points, CGAL::parameters::use_convex_hull(true));
+
+    CGAL::make_hexahedron(obb_points[0], obb_points[1], obb_points[2], obb_points[3],
+                          obb_points[4], obb_points[5], obb_points[6], obb_points[7], obb_mesh);
+
+    for(auto vi = obb_mesh.vertices_begin(); vi != obb_mesh.vertices_end(); vi++) {
+        auto point = obb_mesh.point(*vi);
+        data.vertices.push_back(point.x());
+        data.vertices.push_back(point.y());
+        data.vertices.push_back(point.z());
+
+        std::cout << "vertex:" << point.x() << "," << point.y() << "," << point.z() << std::endl;
+    }
+
+    if(!isTriangulated(obb_mesh)) {
+        std::cout<<"non-triangular mesh, triangulating..."<<std::endl;
+        CGAL::Polygon_mesh_processing::triangulate_faces(obb_mesh);
+    }
+
+    auto i = 0;
+    for(auto faceIt = obb_mesh.faces_begin(); faceIt != obb_mesh.faces_end(); ++faceIt){
+        //get the vertices of the face
+        auto halfedgeIt = obb_mesh.halfedge(*faceIt);
+        auto halfedgeIt2 = obb_mesh.next(halfedgeIt);
+        auto halfedgeIt3 = obb_mesh.next(halfedgeIt2);
+        auto vertexIt = obb_mesh.target(halfedgeIt);
+        auto vertexIt2 = obb_mesh.target(halfedgeIt2);
+        auto vertexIt3 = obb_mesh.target(halfedgeIt3);
+        data.indices.push_back(vertexIt.idx());
+        data.indices.push_back(vertexIt2.idx());
+        data.indices.push_back(vertexIt3.idx());
+
+        std::cout << "index["<<i<<"]:" << vertexIt.idx() << "," << vertexIt2.idx() << "," << vertexIt3.idx() << std::endl;
+        i++;
+    }
+
+    return data;
+}
+
+
 EMSCRIPTEN_BINDINGS(my_module) {
+    emscripten::register_vector<double>("DoubleVec");
+    emscripten::register_vector<int>("IntVec");
+
+    emscripten::value_object<GenerateObbParams>("GenerateObbParams")
+        .field("vertices", &GenerateObbParams::vertices)
+        .field("indices", &GenerateObbParams::indices);
+
+    emscripten::value_object<GenerateObbData>("GenerateObbData")
+        .field("vertices", &GenerateObbData::vertices)
+        .field("indices", &GenerateObbData::indices);
+
+    emscripten::function("generate_obb", &generate_obb);
+
   emscripten::class_<PolyMesh>("PolyMesh")
     .constructor<>()
     .function("addVertex", &PolyMesh::addVertex, emscripten::allow_raw_pointers())
